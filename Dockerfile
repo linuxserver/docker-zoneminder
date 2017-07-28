@@ -49,17 +49,20 @@ ARG RUNTIME_DEPENDENCIES="\
 	libapache2-mod-php \
 	libarchive-zip-perl \
 	libav-tools \
+	libcurl4-openssl-dev \
 	libdate-manip-perl \
 	libdbd-mysql-perl \
-	libcurl4-openssl-dev \
 	libdbi-perl \
 	libdevice-serialport-perl \
 	libjpeg-turbo8 \
 	libmime-lite-perl \
 	libmime-perl \
+	libmp4v2-2 \
 	libpcre3 \
 	libssl-dev \
 	libsys-mmap-perl \
+	libvlc5 \
+	libvlccore8 \
 	libwww-perl \
 	mysql-client \
 	mysql-server \
@@ -97,4 +100,8 @@ RUN \
  rm -rf \
 	/tmp/* \
 	/var/lib/apt/lists/* \
-	/var/tmp/*
+	/var/lib/mysql \
+	/var/tmp/* && \
+ mkdir -p \
+	/var/lib/mysql
+
