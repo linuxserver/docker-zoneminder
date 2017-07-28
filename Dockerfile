@@ -22,7 +22,7 @@ ARG BUILD_DEPENDENCIES="\
 	libavformat-dev \
 	libavresample-dev \
 	libavutil-dev \
-	libbz2-dev \
+	libcurl4-openssl-dev \
 	libjpeg-turbo8-dev \
 	libmp4v2-dev \
 	libmysqlclient-dev \
@@ -47,7 +47,8 @@ ARG RUNTIME_DEPENDENCIES="\
 	libapache2-mod-php \
 	libarchive-zip-perl \
 	libav-tools \
-	libcurl4-openssl-dev \
+	libbz2-dev \
+	libcurl3 \
 	libdate-manip-perl \
 	libdbd-mysql-perl \
 	libdbi-perl \
@@ -102,4 +103,3 @@ RUN \
 	/var/tmp/* && \
  mkdir -p \
 	/var/lib/mysql
-
