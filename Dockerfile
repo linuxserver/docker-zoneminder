@@ -9,7 +9,7 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 ARG DEBIAN_FRONTEND="noninteractive"
 
 # packages as variables
-ARG BUILD_PACKAGES="\
+ARG BUILD_DEPENDENCIES="\
 	cmake \
 	dh-autoreconf \
 	dpatch \
@@ -27,11 +27,9 @@ ARG BUILD_PACKAGES="\
 	libmp4v2-dev \
 	libmysqlclient-dev \
 	libnetpbm10-dev \
-	libpcre3 \
 	libpcre3-dev \
 	libpolkit-gobject-1-dev \
 	libpostproc-dev \
-	libssl-dev \
 	libswscale-dev \
 	libtheora-dev \
 	libtool \
@@ -45,8 +43,9 @@ ARG BUILD_PACKAGES="\
 	libx264-dev \
 	yasm"
 
-ARG RUNTIME_PACKAGES="\
+ARG RUNTIME_DEPENDENCIES="\
 	apache2 \
+	ffmpeg \
 	libapache2-mod-php \
 	libarchive-zip-perl \
 	libav-tools \
@@ -58,6 +57,8 @@ ARG RUNTIME_PACKAGES="\
 	libjpeg-turbo8 \
 	libmime-lite-perl \
 	libmime-perl \
+	libpcre3 \
+	libssl-dev \
 	libsys-mmap-perl \
 	libwww-perl \
 	mysql-client \
@@ -72,8 +73,8 @@ RUN \
  apt-get update && \
  apt-get install -y \
 	--no-install-recommends \
-	$BUILD_PACKAGES \
-	$RUNTIME_PACKAGES && \
+	$BUILD_DEPENDENCIES \
+	$RUNTIME_DEPENDENCIES && \
 
 # build zoneminder
  git clone https://github.com/ZoneMinder/ZoneMinder /tmp/zoneminder && \
@@ -82,6 +83,15 @@ RUN \
  cmake . && \
  make && \
  make install && \
+
+# uninstall build packages
+ apt-get purge -y --auto-remove \
+	$BUILD_DEPENDENCIES && \
+
+# install runtime packages
+ apt-get install -y \
+	--no-install-recommends \
+	$RUNTIME_DEPENDENCIES && \
 
 # cleanup
  rm -rf \
