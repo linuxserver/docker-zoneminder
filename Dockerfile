@@ -34,8 +34,6 @@ ARG BUILD_DEPENDENCIES="\
 	libtheora-dev \
 	libtool \
 	libv4l-dev \
-	libvlc5 \
-	libvlccore8 \
 	libvlccore-dev \
 	libvlc-dev \
 	libvorbis-dev \
