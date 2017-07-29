@@ -89,6 +89,15 @@ RUN \
  git submodule update --init --recursive && \
  cmake \
 	-DCMAKE_INSTALL_PREFIX=/usr \
+	-DZM_CGIDIR=/usr/share/webapps/zoneminder/cgi-bin \
+	-DZM_DIR_EVENTS=/data/zoneminder/events \
+	-DZM_DIR_IMAGES=/data/zoneminder/images \
+	-DZM_LOGDIR=/config/log/zoneminder \
+	-DZM_RUNDIR=/var/run/zoneminder \
+	-DZM_SOCKDIR=/var/run/zoneminder \
+	-DZM_WEBDIR=/usr/share/webapps/zoneminder/htdocs \
+	-DZM_WEB_GROUP=abc \
+	-DZM_WEB_USER=abc \
 	. && \
  make && \
  make install && \
