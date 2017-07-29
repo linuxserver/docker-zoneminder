@@ -7,6 +7,8 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 
 # environment variables
 ARG DEBIAN_FRONTEND="noninteractive"
+ENV MYSQL_DIR="/data"
+ENV DATADIR=$MYSQL_DIR/databases
 
 # packages as variables
 ARG BUILD_DEPENDENCIES="\
@@ -63,8 +65,8 @@ ARG RUNTIME_DEPENDENCIES="\
 	libvlc5 \
 	libvlccore8 \
 	libwww-perl \
-	mysql-client \
-	mysql-server \
+	mariadb-client \
+	mariadb-server \
 	php \
 	php-cli \
 	php-mysql \
@@ -72,6 +74,9 @@ ARG RUNTIME_DEPENDENCIES="\
 
 # install packages
 RUN \
+ apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
+ echo "deb [arch=amd64,i386] http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> /etc/apt/sources.list.d/mariadb.list && \
+ echo "deb-src http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> /etc/apt/sources.list.d/mariadb.list && \
  apt-get update && \
  apt-get install -y \
 	--no-install-recommends \
@@ -82,7 +87,9 @@ RUN \
  git clone https://github.com/ZoneMinder/ZoneMinder /tmp/zoneminder && \
  cd /tmp/zoneminder && \
  git submodule update --init --recursive && \
- cmake . && \
+ cmake \
+	-DCMAKE_INSTALL_PREFIX=/usr \
+	. && \
  make && \
  make install && \
 
@@ -103,3 +110,10 @@ RUN \
 	/var/tmp/* && \
  mkdir -p \
 	/var/lib/mysql
+
+# add local files
+COPY root/ /
+
+# ports and volumes
+EXPOSE 80
+VOLUME /config /data
