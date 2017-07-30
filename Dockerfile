@@ -102,6 +102,26 @@ RUN \
  make && \
  make install && \
 
+# configure apache
+ sed -i \
+	-e "s/\(.*APACHE_RUN_USER=\).*/\1abc/g" \
+	-e "s/\(.*APACHE_RUN_GROUP=\).*/\1abc/g" \
+		/etc/apache2/envvars && \
+
+# configure my.cnf and mysqld_safe
+ sed \
+	-i -e 's/^#sql_mode/sql_mode/g' \
+	-i -e 's/NO_ENGINE_SUBSTITUTION.*/NO_ENGINE_SUBSTITUTION/g' \
+	-i -e 's/key_buffer\b/key_buffer_size/g' \
+	-i -e 's#/var/log/mysql#/config/log/mysql#g' \
+	-i -e 's/\(user.*=\).*/\1 abc/g' \
+	-i -e "s#\(datadir.*=\).*#\1 $DATADIR#g" \
+	-ri -e 's/^(bind-address|skip-networking)/;\1/' \
+		/etc/mysql/my.cnf && \
+ sed -i \
+	"s/user='mysql'/user='abc'/g" \
+		/usr/bin/mysqld_safe && \
+
 # uninstall build packages
  apt-get purge -y --auto-remove \
 	$BUILD_DEPENDENCIES && \
