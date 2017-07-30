@@ -3,8 +3,10 @@
 # make folders if required
 mkdir -p \
 	"$DATADIR" \
-	/config/log/mysql \
-	/var/run/mysqld
+	/config{/apache,/keys,/log/apache,/log/mysql,/log/zoneminder,/zoneminder} \
+	/data{zoneminder/events,/zoneminder/exports,/zoneminder/images,/zoneminder/sounds} \
+	/var/run/mysqld \
+	/var/run/zoneminder
 
 # setup custom cnf file
 [[ ! -f /config/custom.cnf ]] && \
@@ -20,4 +22,6 @@ if [ -e /etc/mysql/debian.cnf ] ; then
 	chmod 644 /etc/mysql/debian.cnf
 fi
 chmod -R 777 \
-	/var/run/mysqld
+	/var/lib/apache2 \
+	/var/run/mysqld \
+	/var/run/zoneminder

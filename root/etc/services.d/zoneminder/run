@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bash
+
+until [ -e /var/run/mysqld/mysqld.sock ]; do
+sleep 1
+done
+
+exec \
+	s6-setuidgid abc \
+	/usr/bin/zmpkg.pl start

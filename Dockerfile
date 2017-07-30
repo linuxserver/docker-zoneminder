@@ -67,6 +67,7 @@ ARG RUNTIME_DEPENDENCIES="\
 	libwww-perl \
 	mariadb-client \
 	mariadb-server \
+	net-tools \
 	php \
 	php-cli \
 	php-mysql \
@@ -92,7 +93,9 @@ RUN \
 	-DZM_CGIDIR=/usr/share/webapps/zoneminder/cgi-bin \
 	-DZM_DIR_EVENTS=/data/zoneminder/events \
 	-DZM_DIR_IMAGES=/data/zoneminder/images \
+	-DZM_DIR_SOUNDS=/data/zoneminder/sounds \
 	-DZM_LOGDIR=/config/log/zoneminder \
+	-DZM_PATH_ARP=/usr/sbin/arp \
 	-DZM_RUNDIR=/var/run/zoneminder \
 	-DZM_SOCKDIR=/var/run/zoneminder \
 	-DZM_WEBDIR=/usr/share/webapps/zoneminder/htdocs \
