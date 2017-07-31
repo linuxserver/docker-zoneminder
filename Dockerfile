@@ -8,7 +8,7 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 # environment variables
 ARG DEBIAN_FRONTEND="noninteractive"
 ENV MYSQL_DIR="/data"
-ENV DATADIR=$MYSQL_DIR/databases
+ENV DATADIR=$MYSQL_DIR/database
 
 # packages as variables
 ARG BUILD_DEPENDENCIES="\

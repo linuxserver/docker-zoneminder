@@ -7,7 +7,7 @@ sed -i "s#;date.timezone =.*#date.timezone = $PHP_TZ#" /etc/php/7.0/apache2/php.
 # make folders if required
 mkdir -p \
 	"$DATADIR" \
-	/config{/apache,/keys,/log/apache,/log/mysql,/log/zoneminder,/zoneminder} \
+	/config{/log/apache,/log/mysql,/log/zoneminder,/mysql,/zoneminder} \
 	/data{/zoneminder/events,/zoneminder/exports,/zoneminder/images,/zoneminder/sounds} \
 	/var/run/mysqld \
 	/var/run/zoneminder
@@ -27,12 +27,12 @@ cp /config/apache/zoneminder.conf /etc/apache2/sites-available/000-default.conf
 	rm -rf /var/run/apache2/*
 
 # setup custom cnf file
-[[ ! -f /config/custom.cnf ]] && \
-	cp /defaults/my.cnf /config/custom.cnf
+[[ ! -f /config/mysql/custom.cnf ]] && \
+	cp /defaults/my.cnf /config/mysql/custom.cnf
 [[ ! -L /etc/mysql/conf.d/custom.cnf && -f /etc/mysql/conf.d/custom.cnf ]] && \
 	rm /etc/mysql/conf.d/custom.cnf
 [[ ! -L /etc/mysql/conf.d/custom.cnf ]] && \
-	ln -s /config/custom.cnf /etc/mysql/conf.d/custom.cnf
+	ln -s /config/mysql/custom.cnf /etc/mysql/conf.d/custom.cnf
 
 # set permissions
 if [ -e /etc/mysql/debian.cnf ] ; then
