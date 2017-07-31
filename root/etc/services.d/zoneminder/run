@@ -4,6 +4,9 @@ until [ -e /var/run/mysqld/mysqld.sock ]; do
 sleep 1
 done
 
-exec \
-	s6-setuidgid abc \
+s6-setuidgid abc \
 	/usr/bin/zmpkg.pl start
+
+exec \
+	s6-setuidgid abc tail -F -q --pid="$(cat /var/run/zoneminder/zm.pid)" \
+	"$(find /var/log/apache2/error.log -printf "%C@ %p\n" |sort | head -n 2)"

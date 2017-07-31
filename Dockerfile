@@ -61,6 +61,8 @@ ARG RUNTIME_DEPENDENCIES="\
 	libmp4v2-2 \
 	libpcre3 \
 	libssl-dev \
+	libsys-cpu-perl \
+	libsys-meminfo-perl \
 	libsys-mmap-perl \
 	libvlc5 \
 	libvlccore8 \
@@ -76,8 +78,10 @@ ARG RUNTIME_DEPENDENCIES="\
 # install packages
 RUN \
  apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
- echo "deb [arch=amd64,i386] http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> /etc/apt/sources.list.d/mariadb.list && \
- echo "deb-src http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> /etc/apt/sources.list.d/mariadb.list && \
+ echo "deb [arch=amd64,i386] http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> \
+	/etc/apt/sources.list.d/mariadb.list && \
+ echo "deb-src http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> \
+	/etc/apt/sources.list.d/mariadb.list && \
  apt-get update && \
  apt-get install -y \
 	--no-install-recommends \
@@ -106,6 +110,8 @@ RUN \
  make install && \
 
 # configure apache
+ cp misc/apache.conf /defaults/default.conf && \
+ a2enmod cgi rewrite && \
  sed -i \
 	-e "s/\(.*APACHE_RUN_USER=\).*/\1abc/g" \
 	-e "s/\(.*APACHE_RUN_GROUP=\).*/\1abc/g" \

@@ -1,12 +1,30 @@
 #!/usr/bin/with-contenv bash
 
+# set php timezone
+PHP_TZ=${PHP_TZ:-Europe/London}
+sed -i "s#;date.timezone =.*#date.timezone = $PHP_TZ#" /etc/php/7.0/apache2/php.ini
+
 # make folders if required
 mkdir -p \
 	"$DATADIR" \
 	/config{/apache,/keys,/log/apache,/log/mysql,/log/zoneminder,/zoneminder} \
-	/data{zoneminder/events,/zoneminder/exports,/zoneminder/images,/zoneminder/sounds} \
+	/data{/zoneminder/events,/zoneminder/exports,/zoneminder/images,/zoneminder/sounds} \
 	/var/run/mysqld \
 	/var/run/zoneminder
+
+
+# copy apache config
+[[ ! -f /config/apache/zoneminder.conf ]] && \
+	cp /defaults/default.conf /config/apache/zoneminder.conf
+cp /config/apache/zoneminder.conf /etc/apache2/sites-available/000-default.conf
+
+# cleanup stale pid and sock files
+[[ -e /var/run/mysqld/mysqld.sock || -e /var/run/mysqld/mysqld.pid ]] && \
+	rm -rf /var/run/mysqld/*
+[[ -e /var/run/zoneminder/zmdc.sock || -e /var/run/zoneminder/zm.pid ]] && \
+	rm -rf /var/run/zoneminder/*
+[[ -e /var/run/apache2/apache2.pid ]] && \
+	rm -rf /var/run/apache2/*
 
 # setup custom cnf file
 [[ ! -f /config/custom.cnf ]] && \
@@ -21,6 +39,8 @@ if [ -e /etc/mysql/debian.cnf ] ; then
 	chown abc:abc /etc/mysql/debian.cnf
 	chmod 644 /etc/mysql/debian.cnf
 fi
+chown -R abc:abc \
+	/data/zoneminder
 chmod -R 777 \
 	/var/lib/apache2 \
 	/var/run/mysqld \
