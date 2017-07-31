@@ -109,6 +109,11 @@ RUN \
  make && \
  make install && \
 
+# configure zoneminder exports folder
+ sed -i \
+	-e "s#\(ZM_DIR_EXPORTS.*=\).*#\1/data/zoneminder/exports#g" \
+	/etc/zm/conf.d/01-system-paths.conf && \
+
 # configure apache
  cp misc/apache.conf /defaults/default.conf && \
  a2enmod cgi rewrite && \
