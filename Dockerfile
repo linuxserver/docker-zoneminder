@@ -114,10 +114,11 @@ RUN \
  make && \
  make install && \
 
-# configure zoneminder exports folder
+# configure zoneminder exports folder and add abc to video group
  sed -i \
 	-e "s#\(ZM_DIR_EXPORTS.*=\).*#\1/data/zoneminder/exports#g" \
 	/etc/zm/conf.d/01-system-paths.conf && \
+ adduser abc video && \
 
 # configure apache
  cp misc/apache.conf /defaults/default.conf && \
@@ -133,7 +134,9 @@ RUN \
 	-i -e 's/NO_ENGINE_SUBSTITUTION.*/NO_ENGINE_SUBSTITUTION/g' \
 	-i -e 's/key_buffer\b/key_buffer_size/g' \
 	-i -e 's#/var/log/mysql#/config/log/mysql#g' \
+	-i -e 's/\(max_allowed_packet.*=\).*/\1 128M/g' \
 	-i -e 's/\(user.*=\).*/\1 abc/g' \
+	-i -e 's/\(wait_timeout.*=\).*/\1 1200/g' \
 	-i -e "s#\(datadir.*=\).*#\1 $DATADIR#g" \
 	-ri -e 's/^(bind-address|skip-networking)/;\1/' \
 		/etc/mysql/my.cnf && \
