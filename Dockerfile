@@ -50,16 +50,21 @@ ARG RUNTIME_DEPENDENCIES="\
 	libarchive-zip-perl \
 	libav-tools \
 	libbz2-dev \
+	libclass-std-fast-perl \
 	libcurl3 \
+	libdata-dump-perl \
+	libdata-uuid-perl \
 	libdate-manip-perl \
 	libdbd-mysql-perl \
 	libdbi-perl \
 	libdevice-serialport-perl \
+	libio-socket-multicast-perl \
 	libjpeg-turbo8 \
 	libmime-lite-perl \
 	libmime-perl \
 	libmp4v2-2 \
 	libpcre3 \
+	libsoap-wsdl-perl \
 	libssl-dev \
 	libsys-cpu-perl \
 	libsys-meminfo-perl \
