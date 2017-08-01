@@ -40,10 +40,8 @@ if [ -e /etc/mysql/debian.cnf ] ; then
 	chmod 644 /etc/mysql/debian.cnf
 fi
 
-chown -R root:abc \
-	/etc/zm/conf.d
-chmod 640 -R \
-	/etc/zm/conf.d
+chgrp -c abc /etc/zm/zm.conf
+chmod 640 /etc/zm/zm.conf
 chown abc:abc \
 	/data
 chown -R abc:abc \
