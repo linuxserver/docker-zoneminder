@@ -100,6 +100,8 @@ RUN \
  cmake \
 	-DCMAKE_INSTALL_PREFIX=/usr \
 	-DZM_CGIDIR=/usr/share/webapps/zoneminder/cgi-bin \
+	-DZM_CONFIG_DIR=/etc/zm \
+	-DZM_CONFIG_SUBDIR=/etc/zm/conf.d \
 	-DZM_DIR_EVENTS=/data/zoneminder/events \
 	-DZM_DIR_IMAGES=/data/zoneminder/images \
 	-DZM_DIR_SOUNDS=/data/zoneminder/sounds \
