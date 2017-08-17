@@ -76,11 +76,12 @@ ARG RUNTIME_DEPENDENCIES="\
 	mariadb-server \
 	net-tools \
 	php \
+	php-apcu \
 	php-cli \
 	php-mysql \
 	vlc-data"
 
-# install packages
+# install packages
 RUN \
  apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
  echo "deb [arch=amd64,i386] http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> \
@@ -93,7 +94,10 @@ RUN \
 	$BUILD_DEPENDENCIES \
 	$RUNTIME_DEPENDENCIES && \
 
-# build zoneminder
+# fix for missing apc library (see root for apc.so)
+ echo "extension=apc.so" >> /etc/php/7.0/mods-available/apcu.ini && \
+
+# build zoneminder
  git clone https://github.com/ZoneMinder/ZoneMinder /tmp/zoneminder && \
  cd /tmp/zoneminder && \
  git submodule update --init --recursive && \
