@@ -41,6 +41,8 @@ ARG BUILD_DEPENDENCIES="\
 	libvorbis-dev \
 	libvpx-dev \
 	libx264-dev \
+	php-dev \
+	php-pear \
 	yasm"
 
 ARG RUNTIME_DEPENDENCIES="\
@@ -92,6 +94,24 @@ RUN \
 	--no-install-recommends \
 	$BUILD_DEPENDENCIES \
 	$RUNTIME_DEPENDENCIES && \
+
+# install php_apcu and php_apcu-bc
+ pecl install apcu && \
+ pecl install apcu_bc-beta && \
+ echo "extension=apc.so" >> /etc/php/7.0/mods-available/z_apc.ini && \
+ echo "extension=apcu.so" >> /etc/php/7.0/mods-available/apcu.ini && \
+ ln -sf \
+	/etc/php/7.0/mods-available/apcu.ini \
+	/etc/php/7.0/apache2/conf.d/20-apcu.ini && \
+ ln -sf \
+	/etc/php/7.0/mods-available/apcu.ini \
+	/etc/php/7.0/cli/conf.d/20-apcu.ini && \
+ ln -sf \
+	/etc/php/7.0/mods-available/z_apc.ini \
+	/etc/php/7.0/apache2/conf.d/40-apc.ini && \
+ ln -sf \
+	/etc/php/7.0/mods-available/z_apc.ini \
+	/etc/php/7.0/cli/conf.d/40-apc.ini && \
 
 # build zoneminder
  git clone https://github.com/ZoneMinder/ZoneMinder /tmp/zoneminder && \
