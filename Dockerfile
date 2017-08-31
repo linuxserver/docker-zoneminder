@@ -80,7 +80,9 @@ ARG RUNTIME_DEPENDENCIES="\
 	php \
 	php-cli \
 	php-mysql \
-	vlc-data"
+	unzip \
+	vlc-data \
+	zip"
 
 # install packages
 RUN \
