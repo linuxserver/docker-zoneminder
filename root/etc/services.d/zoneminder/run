@@ -9,4 +9,4 @@ s6-setuidgid abc \
 
 exec \
 	s6-setuidgid abc tail -F -q --pid="$(cat /var/run/zoneminder/zm.pid)" \
-	"$(find /var/log/apache2/error.log -printf "%C@ %p\n" |sort | head -n 2)"
+	"$(find /var/log/apache2/error.log -printf '%C@ %p\n' |sort | head -n 2)"
