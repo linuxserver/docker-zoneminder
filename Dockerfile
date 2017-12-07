@@ -4,6 +4,7 @@ FROM lsiobase/xenial
 ARG BUILD_DATE
 ARG VERSION
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="sparklyballs"
 
 # environment variables
 ARG DEBIAN_FRONTEND="noninteractive"
@@ -84,20 +85,20 @@ ARG RUNTIME_DEPENDENCIES="\
 	vlc-data \
 	zip"
 
-# install packages
 RUN \
+ echo "**** add repositories ****" && \
  apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
  echo "deb [arch=amd64,i386] http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> \
 	/etc/apt/sources.list.d/mariadb.list && \
  echo "deb-src http://mirrors.coreix.net/mariadb/repo/10.1/ubuntu xenial main" >> \
 	/etc/apt/sources.list.d/mariadb.list && \
+ echo "**** install packages ****" && \
  apt-get update && \
  apt-get install -y \
 	--no-install-recommends \
 	$BUILD_DEPENDENCIES \
 	$RUNTIME_DEPENDENCIES && \
-
-# install php_apcu and php_apcu-bc
+ echo "**** install php_apcu and php_apcu-bc ****" && \
  pecl install apcu && \
  pecl install apcu_bc-beta && \
  echo "extension=apc.so" >> /etc/php/7.0/mods-available/z_apc.ini && \
@@ -114,8 +115,7 @@ RUN \
  ln -sf \
 	/etc/php/7.0/mods-available/z_apc.ini \
 	/etc/php/7.0/cli/conf.d/40-apc.ini && \
-
-# build zoneminder
+ echo "**** build zoneminder ****" && \
  git clone https://github.com/ZoneMinder/ZoneMinder /tmp/zoneminder && \
  cd /tmp/zoneminder && \
  git submodule update --init --recursive && \
@@ -135,24 +135,34 @@ RUN \
 	-DZM_WEB_GROUP=abc \
 	-DZM_WEB_USER=abc \
 	. && \
- make && \
+ echo "**** attempt to set number of cores available for make to use ****" && \
+ set -ex && \
+ CPU_CORES=$( < /proc/cpuinfo grep -c processor ) || echo "failed cpu look up" && \
+ if echo $CPU_CORES | grep -E  -q '^[0-9]+$'; then \
+	: ;\
+ if [ "$CPU_CORES" -gt 7 ]; then \
+	CPU_CORES=$(( CPU_CORES  - 3 )); \
+ elif [ "$CPU_CORES" -gt 5 ]; then \
+	CPU_CORES=$(( CPU_CORES  - 2 )); \
+ elif [ "$CPU_CORES" -gt 3 ]; then \
+	CPU_CORES=$(( CPU_CORES  - 1 )); fi \
+ else CPU_CORES="1"; fi && \
+ make -j $CPU_CORES && \
+ set +ex && \
  make install && \
-
-# configure zoneminder exports folder and add abc to video group
+ echo "**** configure zoneminder exports folder and add abc to video group ****" && \
  sed -i \
 	-e "s#\(ZM_DIR_EXPORTS.*=\).*#\1/data/zoneminder/exports#g" \
 	/etc/zm/conf.d/01-system-paths.conf && \
  adduser abc video && \
-
-# configure apache
+ echo "**** configure apache ****" && \
  cp misc/apache.conf /defaults/default.conf && \
  a2enmod cgi rewrite && \
  sed -i \
 	-e "s/\(.*APACHE_RUN_USER=\).*/\1abc/g" \
 	-e "s/\(.*APACHE_RUN_GROUP=\).*/\1abc/g" \
 		/etc/apache2/envvars && \
-
-# configure my.cnf and mysqld_safe
+ echo "**** configure my.cnf and mysqld_safe ****" && \
  sed \
 	-i -e 's/^#sql_mode/sql_mode/g' \
 	-i -e 's/NO_ENGINE_SUBSTITUTION.*/NO_ENGINE_SUBSTITUTION/g' \
@@ -167,17 +177,13 @@ RUN \
  sed -i \
 	"s/user='mysql'/user='abc'/g" \
 		/usr/bin/mysqld_safe && \
-
-# uninstall build packages
+ echo "**** uninstall build packages and reinstall runtime packages ****" && \
  apt-get purge -y --auto-remove \
 	$BUILD_DEPENDENCIES && \
-
-# install runtime packages
  apt-get install -y \
 	--no-install-recommends \
 	$RUNTIME_DEPENDENCIES && \
-
-# cleanup
+ echo "**** cleanup ****" && \
  rm -rf \
 	/tmp/* \
 	/var/lib/apt/lists/* \
