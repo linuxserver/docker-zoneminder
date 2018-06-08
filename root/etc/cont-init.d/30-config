@@ -10,7 +10,8 @@ mkdir -p \
 	/config/{apache,log/mysql,log/zoneminder,mysql,zoneminder} \
 	/data/{zoneminder/events,zoneminder/exports,zoneminder/images,zoneminder/sounds} \
 	/var/run/mysqld \
-	/var/run/zoneminder
+	/var/run/zoneminder \
+	/var/cache/zoneminder
 
 
 # copy apache config
@@ -50,4 +51,5 @@ chown -R abc:abc \
 chmod -R 777 \
 	/var/lib/apache2 \
 	/var/run/mysqld \
-	/var/run/zoneminder
+	/var/run/zoneminder \
+	/var/cache/zoneminder

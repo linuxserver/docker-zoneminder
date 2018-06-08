@@ -121,6 +121,7 @@ RUN \
  git submodule update --init --recursive && \
  cmake \
 	-DCMAKE_INSTALL_PREFIX=/usr \
+	-DZM_CACHEDIR=/var/cache/zoneminder \
 	-DZM_CGIDIR=/usr/share/webapps/zoneminder/cgi-bin \
 	-DZM_CONFIG_DIR=/etc/zm \
 	-DZM_CONFIG_SUBDIR=/etc/zm/conf.d \
