@@ -5,6 +5,9 @@ sleep 1
 done
 
 s6-setuidgid abc \
+        /usr/bin/zmupdate.pl -u root -p
+
+s6-setuidgid abc \
 	/usr/bin/zmpkg.pl start
 
 exec \
