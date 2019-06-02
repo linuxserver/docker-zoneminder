@@ -73,3 +73,6 @@ chown -R abc:abc \
 	/var/log/zoneminder \
 	/var/run/zoneminder
 chown abc:abc /data
+
+# set lockfile to avoid DB waits for this specific container
+touch /dbwait.lock
