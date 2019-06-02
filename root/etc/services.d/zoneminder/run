@@ -1,12 +1,20 @@
 #!/usr/bin/with-contenv bash
 
-until [ -e /var/run/mysqld/mysqld.sock ]; do
-sleep 1
+# main process
+if [ -z ${TEST_RUN+x} ]; then \
+	s6-setuidgid abc /usr/bin/zmpkg.pl start
+fi
+
+# pid monitoring
+while true ; do
+	if [ -f "/var/run/zoneminder/zm.pid" ]; then
+		if kill -s 0 $(cat /var/run/zoneminder/zm.pid); then
+			sleep 5
+		else
+			exit 1
+		fi
+	else
+		sleep 5
+		exit 1
+	fi
 done
-
-s6-setuidgid abc \
-	/usr/bin/zmpkg.pl start
-
-exec \
-	s6-setuidgid abc tail -F -q --pid="$(cat /var/run/zoneminder/zm.pid)" \
-	"$(find /var/log/apache2/error.log -printf '%C@ %p\n' |sort | head -n 2)"

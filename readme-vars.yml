@@ -1,0 +1,70 @@
+---
+
+# project information
+project_name: zoneminder
+project_url: "https://zoneminder.com/"
+project_logo: "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/zoneminder.png"
+project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) is a full-featured, open source, state-of-the-art video surveillance software system.Monitor your home, office, or wherever you want. Using off the shelf hardware with any camera, you can design a system as large or as small as you need."
+project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project_name }}"
+
+# supported architectures
+available_architectures:
+  - { arch: "{{ arch_x86_64 }}", tag: "amd64-latest"}
+  - { arch: "{{ arch_arm64 }}", tag: "arm64v8-latest"}
+  - { arch: "{{ arch_armhf }}", tag: "arm32v7-latest"}
+
+# container parameters
+common_param_env_vars_enabled: true
+param_container_name: "{{ project_name }}"
+param_usage_include_vols: true
+param_volumes:
+  - { vol_path: "/config", vol_host_path: "<path to {{ project_name }} config>", desc: "Contains config files for zoneminder" }
+  - { vol_path: "/data", vol_host_path: "<path to {{ project_name }} data>", desc: "Contains recording output from zoneminder for images and video" }
+param_usage_include_ports: true
+param_ports:
+  - { external_port: "80", internal_port: "80", port_desc: "Zoneminder webUI" }
+param_usage_include_env: true
+param_env_vars:
+  - { env_var: "DB_HOST", env_value: "<mysql host>", desc: "Mysql hostname or IP to use"}
+  - { env_var: "DB_USER", env_value: "<mysql user>", desc: "Mysql user to use (needs super privileges)"}
+  - { env_var: "DB_PASS", env_value: "<mysql password>", desc: "Mysql password to use"}
+  - { env_var: "TZ", env_value: "Europe/London", desc: "Specify a timezone to use EG Europe/London, this is required for Zoneminder"}
+
+custom_compose: |
+  version: "3"
+  services:
+    mariadb:
+      image: linuxserver/mariadb:latest
+      container_name: zoneminder_mariadb
+      restart: always
+      volumes:
+        - <path to mariadb data>:/config
+      environment:
+        - MYSQL_ROOT_PASSWORD=<secret password>
+    zoneminder:
+      image: linuxserver/zoneminder:latest
+      container_name: zoneminder
+      restart: always
+      depends_on:
+        - mariadb
+      volumes:
+        - <path to config>:/config
+        - <path to data>:/data
+      environment:
+        - DB_HOST=mariadb
+        - DB_USER=root
+        - DB_PASS=<secret password>
+        - PGID=1000
+        - PUID=1000
+        - TZ=Europe/London
+      ports:
+        - "80:80"
+
+# application setup block
+app_setup_block_enabled: true
+app_setup_block: |
+  Access the webui at http://your-ip, zoneminder has verbose usage documentation [here](https://zoneminder.readthedocs.io/en/stable/userguide/index.html)
+
+# changelog
+changelogs:
+  - { date: "01.06.19:", desc: "Initial release." }

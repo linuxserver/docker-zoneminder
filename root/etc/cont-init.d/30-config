@@ -1,53 +1,73 @@
 #!/usr/bin/with-contenv bash
 
-# set php timezone
-PHP_TZ=${PHP_TZ:-Europe/London}
-sed -i "s#;date.timezone =.*#date.timezone = $PHP_TZ#" /etc/php/7.0/apache2/php.ini
+# Env variable validation
+VARS=( \
+DB_HOST \
+DB_USER \
+DB_PASS 
+)
+for i in "${VARS[@]}"; do
+	if [ -z ${!i+x} ]; then
+		echo "[cont-init.d] ${i} is required and is not set will not continue"
+		exit 0
+	fi
+done
 
-# make folders if required
+# create  log directory
 mkdir -p \
-	"$DATADIR" \
-	/config/{apache,log/mysql,log/zoneminder,mysql,zoneminder} \
-	/data/{zoneminder/events,zoneminder/exports,zoneminder/images,zoneminder/sounds} \
-	/var/run/mysqld \
+	/config/log/zoneminder
+# zm directories
+mkdir -p \
+	/var/lib/zoneminder/temp \
+	/var/run/zoneminder
+chown -R abc:abc \
+	/var/lib/zoneminder/temp \
 	/var/run/zoneminder
 
+# symlinks
+LOGFILES=( \
+/var/log/zoneminder/zmdc.log \
+/var/log/zoneminder/zmpkg.log
+)
+for LOGFILE in "${LOGFILES[@]}"; do
+	[[ -e "${LOGFILE}" && ! -L "${LOGFILE}" ]] && rm -f "${LOGFILE}"
+	[[ ! -L "${LOGFILE}" ]] && ln -s /config/log/zoneminder/"$(basename ${LOGFILE})" "${LOGFILE}"
+	touch /config/log/zoneminder/"$(basename ${LOGFILE})"
+done
+CONFIGFILE="/etc/zm.conf"
+[[ ! -e "/config/$(basename ${CONFIGFILE})" ]] && \
+	cp /defaults/"$(basename ${CONFIGFILE})" /config/"$(basename ${CONFIGFILE})" && \
+	sed -i \
+		-e "s/REPLACE_DB_HOST/${DB_HOST}/g" \
+	        -e "s/REPLACE_DB_USER/${DB_USER}/g" \
+	        -e "s/REPLACE_DB_PASS/${DB_PASS}/g" \
+		/config/"$(basename ${CONFIGFILE})"	
+[[ -e "${CONFIGFILE}" && ! -L "${CONFIGFILE}" ]] && rm -f "${CONFIGFILE}"
+[[ ! -L "${CONFIGFILE}" ]] && ln -s /config/"$(basename ${CONFIGFILE})" "${CONFIGFILE}"
 
-# copy apache config
-[[ ! -f /config/apache/zoneminder.conf ]] && \
-	cp /defaults/default.conf /config/apache/zoneminder.conf
-cp /config/apache/zoneminder.conf /etc/apache2/sites-available/000-default.conf
+# check for the mysql endpoint for 30 seconds
+END=$((SECONDS+30))
+while [ ${SECONDS} -lt ${END} ]; do
+	/usr/bin/nc -z ${DB_HOST} 3306 && \
+	if [ ! -z "$(/usr/bin/nc -w1 ${DB_HOST} 3306)" ]; then
+		[ ! -z "${RUN}" ] && break
+		RUN="RAN"
+		# we sleep here again due to first run init on DB containers
+		[ ! -f /dbwait.lock ] && sleep 5
+	else
+		sleep 1
+	fi
+	sleep 1
+done
 
-# cleanup stale pid and sock files
-[[ -e /var/run/mysqld/mysqld.sock || -e /var/run/mysqld/mysqld.pid ]] && \
-	rm -rf /var/run/mysqld/*
-[[ -e /var/run/zoneminder/zmdc.sock || -e /var/run/zoneminder/zm.pid ]] && \
-	rm -rf /var/run/zoneminder/*
-[[ -e /var/run/apache2/apache2.pid ]] && \
-	rm -rf /var/run/apache2/*
-
-# setup custom cnf file
-[[ ! -f /config/mysql/custom.cnf ]] && \
-	cp /defaults/my.cnf /config/mysql/custom.cnf
-[[ ! -L /etc/mysql/conf.d/custom.cnf && -f /etc/mysql/conf.d/custom.cnf ]] && \
-	rm /etc/mysql/conf.d/custom.cnf
-[[ ! -L /etc/mysql/conf.d/custom.cnf ]] && \
-	ln -s /config/mysql/custom.cnf /etc/mysql/conf.d/custom.cnf
-
-# set permissions
-if [ -e /etc/mysql/debian.cnf ] ; then
-	chown abc:abc /etc/mysql/debian.cnf
-	chmod 644 /etc/mysql/debian.cnf
+# run initial database sync if table does not exist
+if ! mysql -h "${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" zm -e"SELECT 1 FROM Config LIMIT 1;"; then
+	mysql -h "${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" < /usr/share/zoneminder/db/zm_create.sql
+	mysql -h "${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" zm -e "UPDATE Storage set Path='/data' where Id=1;"
 fi
 
-chgrp -c abc /etc/zm/zm.conf
-chmod 640 /etc/zm/zm.conf
-chown abc:abc \
-	/data
+# permissions
 chown -R abc:abc \
 	/config \
-	/data/zoneminder
-chmod -R 777 \
-	/var/lib/apache2 \
-	/var/run/mysqld \
-	/var/run/zoneminder
+	/var/log/zoneminder
+chown abc:abc /data

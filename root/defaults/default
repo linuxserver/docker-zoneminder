@@ -1,0 +1,29 @@
+server {
+	listen 80 default_server;
+	server_name _;
+	client_max_body_size 0;
+	location /cgi-bin {
+		gzip off;
+		alias /usr/share/webapps/zoneminder/cgi-bin;
+		include /etc/nginx/fastcgi_params;
+		fastcgi_param SCRIPT_FILENAME $request_filename;
+		fastcgi_pass unix:/var/run/fcgiwrap.socket;
+	}
+	location / {
+		gzip off;
+		alias /usr/share/webapps/zoneminder/htdocs/;
+		index index.php;
+		location ~ \.php$ {
+			if (!-f $request_filename) { return 404; }
+			expires             epoch;
+			include             /etc/nginx/fastcgi_params;
+			fastcgi_param       SCRIPT_FILENAME         $request_filename;
+			fastcgi_index       index.php;
+			fastcgi_pass        127.0.0.1:9000;
+		}
+		location ~ \.(jpg|jpeg|gif|png|ico)$ {
+			access_log          off;
+			expires         33d;
+		}
+	}
+}
