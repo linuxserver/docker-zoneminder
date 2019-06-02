@@ -79,6 +79,9 @@ services:
       - <path to mariadb data>:/config
     environment:
       - MYSQL_ROOT_PASSWORD=<secret password>
+      - PGID=1000
+      - PUID=1000
+      - TZ=Europe/London
   zoneminder:
     image: linuxserver/zoneminder:latest
     container_name: zoneminder
