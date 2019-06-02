@@ -7,6 +7,12 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 LABEL maintainer="thelamer"
 
 RUN \
+ echo "**** install build packages ****" && \
+ apk add --no-cache --virtual=build-dependencies \
+	curl \
+	g++ \
+	gcc \
+	make && \
  echo "**** install packages ****" && \
  apk add --no-cache \
 	fcgiwrap \
@@ -14,7 +20,16 @@ RUN \
 	netcat-openbsd \
 	perl-sys-meminfo && \
  apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/community \
-	zoneminder
+	zoneminder && \
+ echo "**** install perl modules ****" && \
+ curl -L https://cpanmin.us | perl - App::cpanminus && \
+ cpanm -i \
+	Number::Bytes::Human && \
+ echo "**** cleanup ****" && \
+ apk del --purge \
+	build-dependencies && \
+ rm -rf \
+	/tmp/*
 
 # add local files
 COPY root/ /

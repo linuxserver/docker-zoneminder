@@ -13,18 +13,19 @@ for i in "${VARS[@]}"; do
 	fi
 done
 
-# create  log directory
+# create directories
 mkdir -p \
-	/config/log/zoneminder
-# zm directories
-mkdir -p \
-	/var/lib/zoneminder/temp \
-	/var/run/zoneminder
-chown -R abc:abc \
-	/var/lib/zoneminder/temp \
+	/config/log/zoneminder \
+	/config/zoneminder/{cache,events,images,temp} \
 	/var/run/zoneminder
 
 # symlinks
+[[ ! -L "/var/lib/zoneminder" ]] && \
+	rm -Rf "/var/lib/zoneminder" && \
+	ln -s /config/zoneminder /var/lib/zoneminder
+[[ ! -L "/var/cache/zoneminder" ]] && \
+        rm -Rf "/var/cache/zoneminder" && \
+        ln -s /config/zoneminder/cache /var/cache/zoneminder
 LOGFILES=( \
 /var/log/zoneminder/zmdc.log \
 /var/log/zoneminder/zmpkg.log
@@ -69,5 +70,6 @@ fi
 # permissions
 chown -R abc:abc \
 	/config \
-	/var/log/zoneminder
+	/var/log/zoneminder \
+	/var/run/zoneminder
 chown abc:abc /data

@@ -9,6 +9,13 @@ server {
 		fastcgi_param SCRIPT_FILENAME $request_filename;
 		fastcgi_pass unix:/var/run/fcgiwrap.socket;
 	}
+	location /cache {
+		alias /var/cache/zoneminder;
+	}
+	location ~ /api/(css|img|ico) {
+		rewrite ^/api(.+)$ /api/app/webroot/$1 break;
+		try_files $uri $uri/ =404;
+	}
 	location / {
 		gzip off;
 		alias /usr/share/webapps/zoneminder/htdocs/;
@@ -24,6 +31,9 @@ server {
 		location ~ \.(jpg|jpeg|gif|png|ico)$ {
 			access_log          off;
 			expires         33d;
+		}
+		location /api {
+			rewrite ^/api(.+)$ /api/app/webroot/index.php?p=$1 last;
 		}
 	}
 }
